@@ -1,7 +1,14 @@
+import KpAPIError from './Errors/KpAPIError';
+import NoInternetError from './Errors/NoInternetError';
+import KPEmptyResponse from './Errors/KPEmptyResponse';
+
 const KP_API_KEY = 'C3N95B6-J6MMZT5-HX88DKF-BCDKVQ4';
 
 export default class KinopoiskAPI {
   async searchMovies(keyword) {
+    if (!navigator.onLine)
+      throw new NoInternetError('Упс... Нету интернету...');
+
     if (!keyword) {
       console.log('Empty request!');
       return [];
@@ -14,16 +21,24 @@ export default class KinopoiskAPI {
     url.searchParams.set('limit', '6');
     url.searchParams.set('page', '1');
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       method: 'GET',
       headers: {
         'X-API-KEY': KP_API_KEY,
         accept: 'application/json',
       },
     });
+
     if (!response.ok) {
-      throw new Error(await response.text());
+      throw new KpAPIError(
+        'KinopoiskAPIError',
+        await response.text()
+      );
     }
-    return response.json();
+
+    response = await response.json();
+    if (response.total === 0) throw new KPEmptyResponse();
+
+    return response;
   }
 }
