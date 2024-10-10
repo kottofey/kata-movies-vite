@@ -1,55 +1,75 @@
-import '../../fonts/InterUI.css';
 import PropTypes from 'prop-types';
-import { Typography, Flex, Tag, Card, Image, Alert } from 'antd';
-import { Component } from 'react';
+import {
+  Typography,
+  Flex,
+  Tag,
+  Card,
+  Image,
+  Alert,
+  Rate,
+} from 'antd';
 
 import Spinner from '../Spinner';
 
 const { Paragraph } = Typography;
 
-export default class Movie extends Component {
-  state = {};
-
-  render() {
-    const { movie, isLoaded, error, onMoviesLoaded } = this.props;
-
-    return (
-      <Card
-        onClick={() => onMoviesLoaded('призрак')}
-        className='movie'
-        styles={{
-          body: {
-            overflow: 'hidden',
-            padding: 0,
-            width: 450,
-            height: 280,
-            gap: 5,
-          },
-        }}
-        hoverable
-        bordered={false}
-      >
-        {error.isError ? (
-          <Alert
-            type='error'
-            message={`${error.errorObj.error}: ${error.errorObj.statusCode}`}
-            description={error.errorObj.message}
-            closable
-          />
-        ) : null}
-        {isLoaded ? <MovieCardContent movie={movie} /> : null}
-        {!isLoaded && !error.isError ? <Spinner /> : null}
-      </Card>
-    );
-  }
+export default function Movie({ movie, isLoaded, error }) {
+  return (
+    //   <Alert
+    //     type='error'
+    //     message={`${error.errorObj.error}: ${error.errorObj.statusCode}`}
+    //     description={error.errorObj.message}
+    //     closable
+    //   />
+    <Card
+      className='movie'
+      styles={{
+        body: {
+          padding: 0,
+          overflow: 'hidden',
+          width: 480,
+          height: 280,
+          borderRadius: '8px',
+          boxShadow: '0px 4px 12px 0px rgba(0, 0, 0, 0.15)',
+        },
+      }}
+      hoverable
+      bordered
+    >
+      {isLoaded ? <MovieCardContent movie={movie} /> : null}
+      {!isLoaded && !error.isError ? <Spinner /> : null}
+    </Card>
+  );
 }
 
 function MovieCardContent({ movie }) {
-  const { altName, poster, name, year, description } = movie;
+  const {
+    id,
+    altName,
+    poster,
+    name,
+    year,
+    description,
+    rating,
+    tags,
+  } = movie;
 
   const pos = description.indexOf(' ', 180);
   const shortDescription =
     pos === -1 ? description : `${description.slice(0, pos)}...`;
+
+  let ratingColor;
+  const ratingRounded = Math.round(rating);
+
+  if (ratingRounded < 3) {
+    ratingColor = '#E90000';
+  } else if (ratingRounded >= 3 && ratingRounded < 5) {
+    ratingColor = '#E97E00';
+  } else if (ratingRounded >= 5 && ratingRounded < 7) {
+    ratingColor = '#E9D100';
+  } else {
+    ratingColor = '#66E900';
+  }
 
   return (
     <Flex>
@@ -66,8 +86,25 @@ function MovieCardContent({ movie }) {
       <Flex
         vertical
         className='movie__body'
-        style={{ gap: 5, padding: 10 }}
+        style={{ gap: 5, padding: 10, width: 300 }}
       >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            width: 30,
+            height: 30,
+            top: 10,
+            right: 10,
+            borderRadius: '50%',
+            border: '2px solid',
+            borderColor: ratingColor,
+          }}
+        >
+          {ratingRounded}
+        </div>
         <Paragraph
           className='movie__title'
           style={{
@@ -81,28 +118,34 @@ function MovieCardContent({ movie }) {
           {name}
         </Paragraph>
         <Paragraph
+          className='movie__date'
           style={{ marginBottom: 0 }}
           type='secondary'
-          className='movie__date'
         >
           {year}
         </Paragraph>
         <Paragraph
-          className=''
+          className='movie__tags'
           style={{ marginBottom: 0 }}
         >
-          <Tag>Action</Tag>
-          <Tag>Drama</Tag>
+          {tags.map((tag) => (
+            <Tag key={`tag${tag}`}>{tag}</Tag>
+          ))}
         </Paragraph>
         <Paragraph
           ellipsis={{
             tooltip: description,
             rows: 6,
           }}
-          style={{ width: 250 }}
+          style={{ width: 250, marginBottom: 'auto' }}
         >
           {shortDescription}
         </Paragraph>
+        <Rate
+          allowClear
+          defaultValue={ratingRounded}
+          count={10}
+        />
       </Flex>
     </Flex>
   );
@@ -118,5 +161,7 @@ MovieCardContent.propTypes = {
       previewUrl: PropTypes.string,
     }),
     altName: PropTypes.string,
+    rating: PropTypes.number,
+    tags: PropTypes.arrayOf(PropTypes.string),
   }),
 };
