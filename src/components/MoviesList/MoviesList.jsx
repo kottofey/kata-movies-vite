@@ -1,8 +1,11 @@
-// import kpGetMoviesList from '../../utils/kpGetMoviesList';
-import KinopoiskAPI from '../../utils/KinopoiskAPI';
 import Movie from '../Movie';
 
-export default function MoviesList({ moviesList, error, isLoaded }) {
+export default function MoviesList({
+  moviesList,
+  error,
+  isLoaded,
+  onRatingChange,
+}) {
   // onMoviesLoaded = async (keyword) => {
   //   const kpapi = new KinopoiskAPI();
   //   try {
@@ -59,6 +62,7 @@ export default function MoviesList({ moviesList, error, isLoaded }) {
             movie={movie}
             error={error}
             isLoaded={isLoaded}
+            onRatingChange={onRatingChange}
           />
         );
       })}

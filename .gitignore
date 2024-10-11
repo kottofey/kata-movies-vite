@@ -22,4 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-src/teest.jsx
+src/teest.js
+package-lock.json

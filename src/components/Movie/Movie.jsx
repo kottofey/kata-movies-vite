@@ -10,39 +10,53 @@ import {
 } from 'antd';
 
 import Spinner from '../Spinner';
+import calcRatingColor from '../../utils/CalcRatingColor';
+import getShortDescription from '../../utils/getShortDescription';
 
 const { Paragraph } = Typography;
 
-export default function Movie({ movie, isLoaded, error }) {
+export default function Movie({
+  movie,
+  isLoaded,
+  error,
+  onRatingChange,
+}) {
   return (
-    //   <Alert
-    //     type='error'
-    //     message={`${error.errorObj.error}: ${error.errorObj.statusCode}`}
-    //     description={error.errorObj.message}
-    //     closable
-    //   />
-    <Card
-      className='movie'
-      styles={{
-        body: {
-          padding: 0,
-          overflow: 'hidden',
-          width: 480,
-          height: 280,
-          borderRadius: '8px',
-          boxShadow: '0px 4px 12px 0px rgba(0, 0, 0, 0.15)',
-        },
-      }}
-      hoverable
-      bordered
-    >
-      {isLoaded ? <MovieCardContent movie={movie} /> : null}
-      {!isLoaded && !error.isError ? <Spinner /> : null}
-    </Card>
+    <>
+      {/* <Alert */}
+      {/*  type='error' */}
+      {/*  message={`${error.errorObj.error}: ${error.errorObj.statusCode}`} */}
+      {/*  description={error.errorObj.message} */}
+      {/*  closable */}
+      {/* /> */}
+      <Card
+        className='movie'
+        styles={{
+          body: {
+            padding: 0,
+            overflow: 'hidden',
+            width: 480,
+            height: 280,
+            borderRadius: '8px',
+            boxShadow: '0px 4px 12px 0px rgba(0, 0, 0, 0.15)',
+          },
+        }}
+        hoverable
+        bordered
+      >
+        {isLoaded ? (
+          <MovieCardContent
+            movie={movie}
+            onRatingChange={onRatingChange}
+          />
+        ) : null}
+        {!isLoaded && !error.isError ? <Spinner /> : null}
+      </Card>
+    </>
   );
 }
 
-function MovieCardContent({ movie }) {
+function MovieCardContent({ movie, onRatingChange }) {
   const {
     id,
     altName,
@@ -51,25 +65,13 @@ function MovieCardContent({ movie }) {
     year,
     description,
     rating,
+    customRating,
     tags,
   } = movie;
 
-  const pos = description.indexOf(' ', 180);
-  const shortDescription =
-    pos === -1 ? description : `${description.slice(0, pos)}...`;
-
-  let ratingColor;
-  const ratingRounded = Math.round(rating);
-
-  if (ratingRounded < 3) {
-    ratingColor = '#E90000';
-  } else if (ratingRounded >= 3 && ratingRounded < 5) {
-    ratingColor = '#E97E00';
-  } else if (ratingRounded >= 5 && ratingRounded < 7) {
-    ratingColor = '#E9D100';
-  } else {
-    ratingColor = '#66E900';
-  }
+  const shortDescription = getShortDescription(description, 180);
+  const ratingRounded = Math.round(rating * 10) / 10;
+  const ratingColor = calcRatingColor(ratingRounded);
 
   return (
     <Flex>
@@ -143,8 +145,10 @@ function MovieCardContent({ movie }) {
         </Paragraph>
         <Rate
           allowClear
-          defaultValue={ratingRounded}
+          defaultValue={0}
+          value={customRating || 0}
           count={10}
+          onChange={(r) => onRatingChange(id, r)}
         />
       </Flex>
     </Flex>
@@ -152,7 +156,7 @@ function MovieCardContent({ movie }) {
 }
 MovieCardContent.propTypes = {
   movie: PropTypes.shape({
-    id: PropTypes.number,
+    id: PropTypes.string,
     name: PropTypes.string,
     year: PropTypes.number,
     description: PropTypes.string,
@@ -162,6 +166,7 @@ MovieCardContent.propTypes = {
     }),
     altName: PropTypes.string,
     rating: PropTypes.number,
+    customRating: PropTypes.number,
     tags: PropTypes.arrayOf(PropTypes.string),
   }),
 };
