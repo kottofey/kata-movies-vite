@@ -48,6 +48,7 @@ export default class App extends Component {
         .then((res) =>
           this.setState({
             moviesList: { ...res, page },
+            savedSearch: { ...res, page: 1 },
           })
         );
     }
