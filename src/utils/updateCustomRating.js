@@ -1,9 +1,17 @@
 export default function updateCustomRating(moviesList, ratedList) {
-  console.log('updated');
-  // TODO надо сравнивать айдишники найденных фильмов
-  //  со списком ratedMoviesList и обновлять поле
-  //  customRating в выдаче каждый раз при новом поиске
+  const updatedList = structuredClone(moviesList);
+  moviesList.docs.forEach((el1, i) => {
+    let ratedEl;
 
-  console.log(moviesList);
-  console.log(ratedList);
+    const isRated = ratedList.docs.some((el2) => {
+      ratedEl = el2;
+      return el2.id === el1.id;
+    });
+
+    if (isRated) {
+      updatedList.docs[i] = ratedEl;
+    }
+  });
+
+  return updatedList;
 }

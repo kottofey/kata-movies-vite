@@ -14,7 +14,7 @@ export default class App extends Component {
     isLoaded: true,
     error: false,
     moviesList: { docs: [], total: 0, page: undefined },
-    ratedMoviesList: { docs: [] },
+    ratedMoviesList: { docs: [], total: 0, page: undefined },
     savedSearch: { docs: [], total: 0, page: undefined },
   };
 
@@ -26,6 +26,7 @@ export default class App extends Component {
       pageSize,
       moviesList: { page },
       tabSelected,
+      ratedMoviesList,
     } = this.state;
 
     const {
@@ -43,14 +44,14 @@ export default class App extends Component {
         tabSelected !== prevTabSelected &&
         search.length)
     ) {
-      this.kpAPI
-        .debugSearchMovies(search, pageSize, page)
-        .then((res) =>
-          this.setState({
-            moviesList: { ...res, page },
-            savedSearch: { ...res, page: 1 },
-          })
-        );
+      // alert('API Call');
+      this.kpAPI.searchMovies(search, pageSize, page).then((res) => {
+        const updList = updateCustomRating(res, ratedMoviesList);
+        this.setState({
+          moviesList: { ...updList, page },
+          savedSearch: { ...updList, page: 1 },
+        });
+      });
     }
   }
 
@@ -70,7 +71,7 @@ export default class App extends Component {
       const newMoviesList = structuredClone(moviesList);
       const newRatedList = structuredClone(ratedMoviesList);
 
-      const { docs } = newMoviesList;
+      const { docs, page, total } = newMoviesList;
       let { docs: ratedDocs } = newRatedList;
 
       const idx = docs.findIndex((item) => item.id === id);
@@ -84,8 +85,11 @@ export default class App extends Component {
               ...ratedDocs.slice(0, ratedIdx),
               ...ratedDocs.slice(ratedIdx + 1),
             ],
+            page,
+            total,
           },
-          moviesList: { docs },
+          moviesList: { docs, page, total },
+          savedSearch: { docs, page, total },
         };
       }
 
@@ -98,8 +102,9 @@ export default class App extends Component {
       }
 
       return {
-        ratedMoviesList: { docs: ratedDocs },
-        moviesList: { docs },
+        ratedMoviesList: { docs: ratedDocs, page, total },
+        moviesList: { docs, page, total },
+        savedSearch: { docs, page, total },
       };
     });
   };
@@ -125,8 +130,14 @@ export default class App extends Component {
   };
 
   render() {
-    const { isLoaded, error, moviesList, ratedMoviesList, pageSize } =
-      this.state;
+    const {
+      isLoaded,
+      error,
+      moviesList,
+      ratedMoviesList,
+      pageSize,
+      tabSelected,
+    } = this.state;
 
     return (
       <>
@@ -196,7 +207,7 @@ export default class App extends Component {
             pageSizeOptions={[6, 12, 24, 48]}
             pageSize={pageSize}
             defaultCurrent={1}
-            total={moviesList.total}
+            total={tabSelected === 'search' && moviesList.total}
             current={moviesList.page}
             style={{ margin: '10px auto' }}
             onChange={(pg, pgSize) =>
