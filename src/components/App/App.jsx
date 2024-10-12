@@ -67,35 +67,38 @@ export default class App extends Component {
   onRatingChange = (id, r) => {
     this.setState(({ moviesList, ratedMoviesList }) => {
       const newMoviesList = structuredClone(moviesList);
-      let newRatedList = structuredClone(ratedMoviesList);
+      const newRatedList = structuredClone(ratedMoviesList);
 
-      const idx = newMoviesList.findIndex((item) => item.id === id);
-      const ratedIdx = newRatedList.findIndex(
-        (item) => item.id === id
-      );
+      const { docs } = newMoviesList;
+      let { docs: ratedDocs } = newRatedList;
+
+      const idx = docs.findIndex((item) => item.id === id);
+      const ratedIdx = ratedDocs.findIndex((item) => item.id === id);
 
       if (r === 0) {
-        delete newMoviesList[idx].customRating;
+        delete docs[idx].customRating;
         return {
-          ratedMoviesList: [
-            ...newRatedList.slice(0, ratedIdx),
-            ...newRatedList.slice(ratedIdx + 1),
-          ],
-          moviesList: newMoviesList,
+          ratedMoviesList: {
+            docs: [
+              ...ratedDocs.slice(0, ratedIdx),
+              ...ratedDocs.slice(ratedIdx + 1),
+            ],
+          },
+          moviesList: { docs },
         };
       }
 
-      newMoviesList[idx].customRating = r;
+      docs[idx].customRating = r;
 
       if (ratedIdx < 0) {
-        newRatedList = [...newRatedList, newMoviesList[idx]];
+        ratedDocs = [...ratedDocs, docs[idx]];
       } else {
-        newRatedList[ratedIdx] = newMoviesList[idx];
+        ratedDocs[ratedIdx] = docs[idx];
       }
 
       return {
-        ratedMoviesList: newRatedList,
-        moviesList: newMoviesList,
+        ratedMoviesList: { docs: ratedDocs },
+        moviesList: { docs },
       };
     });
   };
