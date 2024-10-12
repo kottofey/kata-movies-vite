@@ -4,37 +4,65 @@ import { debounce } from 'lodash';
 
 import MoviesList from '../MoviesList';
 import KinopoiskAPI from '../../utils/KinopoiskAPI';
-import updateCustomRating from '../../utils/updateCustomRating.js';
+import updateCustomRating from '../../utils/updateCustomRating';
 
 export default class App extends Component {
   state = {
     search: '',
+    pageSize: 6,
+    tabSelected: 'search',
     isLoaded: true,
     error: false,
-    moviesList: [],
-    ratedMoviesList: [],
-    savedSearch: [],
-    page: 1,
-    pages: 50,
+    moviesList: { docs: [], total: 0, page: undefined },
+    ratedMoviesList: { docs: [] },
+    savedSearch: { docs: [], total: 0, page: undefined },
   };
 
   kpAPI = new KinopoiskAPI();
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.search !== prevState.search) {
+    const {
+      search,
+      pageSize,
+      moviesList: { page },
+      tabSelected,
+    } = this.state;
+
+    const {
+      search: prevSearch,
+      pageSize: prevPageSize,
+      moviesList: { page: prevPage },
+      tabSelected: prevTabSelected,
+    } = prevState;
+
+    if (
+      search !== prevSearch ||
+      pageSize !== prevPageSize ||
+      (page !== prevPage && page) ||
+      (tabSelected === 'search' &&
+        tabSelected !== prevTabSelected &&
+        search.length)
+    ) {
       this.kpAPI
-        .debugSearchMovies(this.state.search)
-        .then((res) => this.setState({ moviesList: res }));
+        .debugSearchMovies(search, pageSize, page)
+        .then((res) =>
+          this.setState({
+            moviesList: { ...res, page },
+          })
+        );
     }
   }
 
   onSearch = (keyword) => {
-    this.setState({
-      search: keyword,
+    this.setState(({ moviesList }) => {
+      return {
+        moviesList: { ...moviesList, page: 1 },
+        search: keyword,
+      };
     });
   };
 
-  onSearchDebounced = debounce(this.onSearch, 500);
+  onSearchDebounced = debounce(this.onSearch, 1000);
 
   onRatingChange = (id, r) => {
     this.setState(({ moviesList, ratedMoviesList }) => {
@@ -72,16 +100,29 @@ export default class App extends Component {
     });
   };
 
+  onTabClick = (tabId) => {
+    if (tabId === 'rated') {
+      this.setState(({ moviesList, ratedMoviesList }) => {
+        return {
+          savedSearch: moviesList,
+          moviesList: ratedMoviesList,
+          tabSelected: tabId,
+        };
+      });
+    } else {
+      this.setState(({ savedSearch }) => {
+        return {
+          moviesList: savedSearch,
+          tabSelected: tabId,
+          page: 1,
+        };
+      });
+    }
+  };
+
   render() {
-    const {
-      isLoaded,
-      error,
-      moviesList,
-      ratedMoviesList,
-      savedSearch,
-      pages,
-      page,
-    } = this.state;
+    const { isLoaded, error, moviesList, ratedMoviesList, pageSize } =
+      this.state;
 
     return (
       <>
@@ -93,19 +134,7 @@ export default class App extends Component {
             alignItems: 'center',
             width: '100%',
           }}
-          onTabClick={(tabId) => {
-            updateCustomRating(moviesList, ratedMoviesList);
-            if (tabId === 'rated') {
-              this.setState({
-                savedSearch: [...moviesList],
-                moviesList: [...ratedMoviesList],
-              });
-            } else {
-              this.setState({
-                moviesList: [...savedSearch],
-              });
-            }
-          }}
+          onTabClick={(tabId) => this.onTabClick(tabId)}
           items={[
             {
               key: 'search',
@@ -159,11 +188,19 @@ export default class App extends Component {
         >
           <Pagination
             align='center'
-            defaultCurrent={3}
-            total={pages}
+            hideOnSinglePage
+            pageSizeOptions={[6, 12, 24, 48]}
+            pageSize={pageSize}
+            defaultCurrent={1}
+            total={moviesList.total}
+            current={moviesList.page}
             style={{ margin: '10px auto' }}
-            current={page}
-            onChange={(pg) => this.setState({ page: pg })}
+            onChange={(pg, pgSize) =>
+              this.setState({
+                moviesList: { ...moviesList, page: pg },
+                pageSize: pgSize,
+              })
+            }
           />
         </ConfigProvider>
       </>

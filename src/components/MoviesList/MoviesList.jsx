@@ -6,40 +6,7 @@ export default function MoviesList({
   isLoaded,
   onRatingChange,
 }) {
-  // onMoviesLoaded = async (keyword) => {
-  //   const kpapi = new KinopoiskAPI();
-  //   try {
-  //     const newList = await kpapi.searchMovies(keyword);
-  //
-  //     this.setState({
-  //       moviesList: newList.docs,
-  //       isLoaded: true,
-  //       search: keyword,
-  //     });
-  //     console.log(this.state.search);
-  //   } catch (e) {
-  //     this.onError(e.errorObj);
-  //   }
-  // };
-  //
-  // onError = (error) => {
-  //   this.setState({
-  //     moviesList: [
-  //       {
-  //         id: 1,
-  //         name: 'null',
-  //         year: 0,
-  //         description: 'null',
-  //         poster: {
-  //           url: '',
-  //           previewUrl: '',
-  //         },
-  //         altName: 'null',
-  //       },
-  //     ],
-  //     error: { isError: true, errorObj: error },
-  //   });
-  // };
+  const { docs } = moviesList;
 
   return (
     <div
@@ -53,7 +20,7 @@ export default function MoviesList({
         gap: 24,
       }}
     >
-      {moviesList.map((movie) => {
+      {docs.map((movie) => {
         const { id } = movie;
 
         return (

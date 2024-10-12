@@ -11,7 +11,7 @@ import {
 
 import Spinner from '../Spinner';
 import calcRatingColor from '../../utils/CalcRatingColor';
-import getShortDescription from '../../utils/getShortDescription';
+import getShortText from '../../utils/getShortText';
 
 const { Paragraph } = Typography;
 
@@ -69,15 +69,23 @@ function MovieCardContent({ movie, onRatingChange }) {
     tags,
   } = movie;
 
-  const shortDescription = getShortDescription(description, 180);
-  const ratingRounded = Math.round(rating * 10) / 10;
+  const singleRating =
+    rating.kp ||
+    rating.imdb ||
+    rating.filmCritics ||
+    rating.russianFilmCritics;
+
+  const shortDescription = getShortText(description, 180);
+  const ratingRounded = Math.round(singleRating * 10) / 10;
   const ratingColor = calcRatingColor(ratingRounded);
+  const shortName = getShortText(name, 80);
 
   return (
     <Flex>
       <Image
         alt={`Movie poster for ${altName}`}
-        src={poster ? poster.url : ''}
+        src={poster.url || ''}
+        preview={{ src: poster.previewUrl || '' }}
         fallback='https://fakeimg.pl/180x280/?text=No%0APreview%0AAvailable&font=lobster'
         style={{
           display: 'block',
@@ -88,7 +96,12 @@ function MovieCardContent({ movie, onRatingChange }) {
       <Flex
         vertical
         className='movie__body'
-        style={{ gap: 5, padding: 10, width: 300 }}
+        style={{
+          gap: 5,
+          padding: 10,
+          width: 300,
+          position: 'relative',
+        }}
       >
         <div
           style={{
@@ -109,15 +122,22 @@ function MovieCardContent({ movie, onRatingChange }) {
         </div>
         <Paragraph
           className='movie__title'
+          ellipsis={{
+            tooltip: name,
+            rows: 2,
+          }}
           style={{
             marginBottom: 0,
+            paddingRight: 32,
+            maxHeight: 48,
+            overflow: 'hidden',
             fontWeight: 'bold',
             fontSize: 20,
             fontFamily: 'Inter UI',
             lineHeight: 1.2,
           }}
         >
-          {name}
+          {shortName}
         </Paragraph>
         <Paragraph
           className='movie__date'
@@ -137,7 +157,7 @@ function MovieCardContent({ movie, onRatingChange }) {
         <Paragraph
           ellipsis={{
             tooltip: description,
-            rows: 6,
+            rows: 5,
           }}
           style={{ width: 250, marginBottom: 'auto' }}
         >
@@ -156,7 +176,7 @@ function MovieCardContent({ movie, onRatingChange }) {
 }
 MovieCardContent.propTypes = {
   movie: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.number,
     name: PropTypes.string,
     year: PropTypes.number,
     description: PropTypes.string,
@@ -165,7 +185,12 @@ MovieCardContent.propTypes = {
       previewUrl: PropTypes.string,
     }),
     altName: PropTypes.string,
-    rating: PropTypes.number,
+    rating: PropTypes.shape({
+      kp: PropTypes.number,
+      imdb: PropTypes.number,
+      filmCritics: PropTypes.number,
+      russianFilmCritics: PropTypes.number,
+    }),
     customRating: PropTypes.number,
     tags: PropTypes.arrayOf(PropTypes.string),
   }),
