@@ -1,4 +1,4 @@
-import { Input, Tabs, Pagination, ConfigProvider } from 'antd';
+import { Input, Tabs, Alert } from 'antd';
 import { Component } from 'react';
 import { debounce } from 'lodash';
 
@@ -12,7 +12,10 @@ export default class App extends Component {
     pageSize: 6,
     tabSelected: 'search',
     isLoaded: true,
-    error: false,
+    error: {
+      isError: false,
+      errorObj: {},
+    },
     moviesList: { docs: [], total: 0, page: undefined },
     ratedMoviesList: { docs: [], total: 0, page: undefined },
     savedSearch: { docs: [], total: 0, page: undefined },
@@ -44,20 +47,35 @@ export default class App extends Component {
         tabSelected !== prevTabSelected &&
         search.length)
     ) {
-      // alert('API Call');
-      this.kpAPI.searchMovies(search, pageSize, page).then((res) => {
-        const updList = updateCustomRating(res, ratedMoviesList);
-        this.setState({
-          moviesList: { ...updList, page },
-          savedSearch: { ...updList, page: 1 },
+      this.kpAPI
+        .searchMovies(search, pageSize, page)
+        .then((res) => {
+          const updList = updateCustomRating(res, ratedMoviesList);
+          this.setState({
+            isLoaded: true,
+            moviesList: { ...updList, page },
+            savedSearch: { ...updList, page: 1 },
+          });
+        })
+        .catch((e) => {
+          this.setState(() => {
+            console.log('Error!');
+
+            return {
+              error: {
+                isError: true,
+                errorObj: e,
+              },
+            };
+          });
         });
-      });
     }
   }
 
   onSearch = (keyword) => {
     this.setState(({ moviesList }) => {
       return {
+        isLoaded: false,
         moviesList: { ...moviesList, page: 1 },
         search: keyword,
       };
@@ -129,6 +147,15 @@ export default class App extends Component {
     }
   };
 
+  onPaginationChange = (pg, pgSize) => {
+    this.setState(({ moviesList }) => {
+      return {
+        moviesList: { ...moviesList, page: pg },
+        pageSize: pgSize,
+      };
+    });
+  };
+
   render() {
     const {
       isLoaded,
@@ -141,6 +168,27 @@ export default class App extends Component {
 
     return (
       <>
+        {error.isError && (
+          <Alert
+            type='error'
+            message={`${error.errorObj.error}. Код ошибки: ${error.errorObj.statusCode}`}
+            description={error.errorObj.message}
+            closable
+            banner
+            onClose={() =>
+              this.setState(() => {
+                return {
+                  error: { isError: false },
+                };
+              })
+            }
+            style={{
+              position: 'absolute',
+              zIndex: 1000,
+              width: '100%',
+            }}
+          />
+        )}
         <Tabs
           defaultActiveKey={0}
           centered
@@ -181,43 +229,15 @@ export default class App extends Component {
           onRatingChange={this.onRatingChange}
           error={error}
           isLoaded={isLoaded}
+          pageSize={pageSize}
+          tabSelected={tabSelected}
+          onPaginationChange={this.onPaginationChange}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
             flexDirection: 'column',
           }}
         />
-
-        <ConfigProvider
-          theme={{
-            token: {
-              colorPrimary: '#fff',
-              fontFamily: 'Inter UI',
-            },
-            components: {
-              Pagination: {
-                itemActiveBg: '#1890FF',
-              },
-            },
-          }}
-        >
-          <Pagination
-            align='center'
-            hideOnSinglePage
-            pageSizeOptions={[6, 12, 24, 48]}
-            pageSize={pageSize}
-            defaultCurrent={1}
-            total={tabSelected === 'search' && moviesList.total}
-            current={moviesList.page}
-            style={{ margin: '10px auto' }}
-            onChange={(pg, pgSize) =>
-              this.setState({
-                moviesList: { ...moviesList, page: pg },
-                pageSize: pgSize,
-              })
-            }
-          />
-        </ConfigProvider>
       </>
     );
   }

@@ -2,10 +2,9 @@ export default class KPEmptyResponse extends Error {
   constructor() {
     super();
     this.name = 'EmptyResponse';
-    this.errorObj = {
-      error: 'Empty Response',
-      statusCode: 404,
-      message: 'Requested string not found',
-    };
+    this.error = 'Ошибка поиска';
+    this.statusCode = 404;
+    this.message =
+      'Кинопоиск вернул... ничего. Попробуйте переформулировать запрос.';
   }
 }

@@ -1,13 +1,5 @@
 import PropTypes from 'prop-types';
-import {
-  Typography,
-  Flex,
-  Tag,
-  Card,
-  Image,
-  Alert,
-  Rate,
-} from 'antd';
+import { Typography, Flex, Tag, Card, Image, Rate } from 'antd';
 
 import Spinner from '../Spinner';
 import calcRatingColor from '../../utils/CalcRatingColor';
@@ -22,37 +14,33 @@ export default function Movie({
   onRatingChange,
 }) {
   return (
-    <>
-      {/* <Alert */}
-      {/*  type='error' */}
-      {/*  message={`${error.errorObj.error}: ${error.errorObj.statusCode}`} */}
-      {/*  description={error.errorObj.message} */}
-      {/*  closable */}
-      {/* /> */}
-      <Card
-        className='movie'
-        styles={{
-          body: {
-            padding: 0,
-            overflow: 'hidden',
-            width: 480,
-            height: 280,
-            borderRadius: '8px',
-            boxShadow: '0px 4px 12px 0px rgba(0, 0, 0, 0.15)',
-          },
-        }}
-        hoverable
-        bordered
-      >
-        {isLoaded ? (
-          <MovieCardContent
-            movie={movie}
-            onRatingChange={onRatingChange}
-          />
-        ) : null}
-        {!isLoaded && !error.isError ? <Spinner /> : null}
-      </Card>
-    </>
+    <Card
+      className='movie'
+      styles={{
+        body: {
+          padding: 0,
+          overflow: 'hidden',
+          width: 480,
+          height: 280,
+          borderRadius: '8px',
+          boxShadow: '0px 4px 12px 0px rgba(0, 0, 0, 0.15)',
+        },
+      }}
+      hoverable
+      bordered
+    >
+      {isLoaded ? (
+        <MovieCardContent
+          movie={movie}
+          onRatingChange={onRatingChange}
+        />
+      ) : (
+        <Spinner
+          size='large'
+          spinning={!error.isError}
+        />
+      )}
+    </Card>
   );
 }
 
@@ -87,6 +75,7 @@ function MovieCardContent({ movie, onRatingChange }) {
         src={poster.url || ''}
         preview={{ src: poster.previewUrl || '' }}
         fallback='https://fakeimg.pl/180x280/?text=No%0APreview%0AAvailable&font=lobster'
+        placeholder={<Spinner size='small' />}
         style={{
           display: 'block',
           width: 180,

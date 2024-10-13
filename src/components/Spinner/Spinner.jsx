@@ -1,9 +1,10 @@
 import { Spin } from 'antd';
 
-export default function Spinner() {
+export default function Spinner({ size, spinning }) {
   return (
     <Spin
-      size='large'
+      size={size}
+      spinning={spinning}
       style={{
         margin: 'auto',
         alignContent: 'center',

@@ -2,10 +2,9 @@ export default class NoInternetError extends Error {
   constructor(message) {
     super(message);
     this.name = 'TeapotError';
-    this.errorObj = {
-      error: this.name,
-      statusCode: 418,
-      message,
-    };
+
+    this.error = this.name;
+    this.statusCode = 418;
+    this.message = message;
   }
 }

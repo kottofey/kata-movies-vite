@@ -67,7 +67,7 @@ export default class KinopoiskAPI {
     return this.respObj;
   };
 
-  debugSearchMovies = async (keyword, pageSize, page) => {
+  debugSearchMovies = async (keyword) => {
     this.respObj = {
       docs: [
         {
@@ -218,6 +218,11 @@ export default class KinopoiskAPI {
       total: 96,
       page: 1,
     };
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2000);
+    });
+
     return this.respObj;
   };
 }
