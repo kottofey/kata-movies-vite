@@ -1,3 +1,3 @@
 # Movies app from Kata
 
-https://vercel.live/link/kata-movies-vite.vercel.app
+https://kata-movies-vite.vercel.app/
