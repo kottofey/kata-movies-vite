@@ -1,6 +1,6 @@
 import KpAPIError from './Errors/KpAPIError';
 import NoInternetError from './Errors/NoInternetError';
-import KPEmptyResponse from './Errors/KPEmptyResponse';
+import KPEmptyResponseError from './Errors/KPEmptyResponseError';
 
 const KP_API_KEY = 'C3N95B6-J6MMZT5-HX88DKF-BCDKVQ4';
 const DEBUG_DELAY = 0;
@@ -14,7 +14,7 @@ export default class KinopoiskAPI {
       throw new NoInternetError('Упс... Нету интернету...');
 
     if (!keyword) {
-      return [];
+      return { docs: [] };
     }
 
     const url = new URL(
@@ -40,7 +40,7 @@ export default class KinopoiskAPI {
     }
 
     response = await response.json();
-    if (response.total === 0) throw new KPEmptyResponse();
+    if (response.total === 0) throw new KPEmptyResponseError();
 
     this.respObj.docs = response.docs.map((movie) => ({
       id: movie.id,

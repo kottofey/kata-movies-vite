@@ -1,4 +1,4 @@
-export default class KPEmptyResponse extends Error {
+export default class KPEmptyResponseError extends Error {
   constructor() {
     super();
     this.name = 'EmptyResponse';
