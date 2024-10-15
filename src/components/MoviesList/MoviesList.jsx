@@ -6,21 +6,22 @@ export default function MoviesList({
   moviesList,
   error,
   isLoaded,
+  isMobile,
   onRatingChange,
   pageSize,
   tabSelected,
   onPaginationChange,
 }) {
   const { docs } = moviesList;
-
   return (
     <>
       <div
         className='moviesList'
         style={{
-          width: '100%',
           display: 'flex',
           flexWrap: 'wrap',
+          width: '90vw',
+          maxWidth: 1010,
           justifyContent: 'center',
           margin: '0 auto',
           gap: 24,
@@ -34,6 +35,7 @@ export default function MoviesList({
               key={`movie${id}`}
               movie={movie}
               error={error}
+              isMobile={isMobile}
               isLoaded={isLoaded}
               onRatingChange={onRatingChange}
             />

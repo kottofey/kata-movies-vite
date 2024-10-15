@@ -207,7 +207,7 @@ export default class App extends Component {
                   placeholder='Type to search...'
                   style={{
                     width: '90vw',
-                    minWidth: 482,
+                    // minWidth: 482,
                     maxWidth: 990,
                     marginBottom: 18,
                   }}
@@ -229,14 +229,10 @@ export default class App extends Component {
           onRatingChange={this.onRatingChange}
           error={error}
           isLoaded={isLoaded}
+          isMobile={window.innerWidth < 576}
           pageSize={pageSize}
           tabSelected={tabSelected}
           onPaginationChange={this.onPaginationChange}
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            flexDirection: 'column',
-          }}
         />
       </>
     );
