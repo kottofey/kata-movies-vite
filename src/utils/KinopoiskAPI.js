@@ -3,7 +3,7 @@ import NoInternetError from './Errors/NoInternetError';
 import KPEmptyResponse from './Errors/KPEmptyResponse';
 
 const KP_API_KEY = 'C3N95B6-J6MMZT5-HX88DKF-BCDKVQ4';
-
+const DEBUG_DELAY = 0;
 export default class KinopoiskAPI {
   constructor() {
     this.respObj = {};
@@ -14,7 +14,6 @@ export default class KinopoiskAPI {
       throw new NoInternetError('Упс... Нету интернету...');
 
     if (!keyword) {
-      console.log('Empty request!');
       return [];
     }
 
@@ -86,7 +85,14 @@ export default class KinopoiskAPI {
             filmCritics: undefined,
             russianFilmCritics: undefined,
           },
-          tags: ['Tag 111', 'Tag 222', 'Tag 333'],
+          tags: [
+            'Tag 111',
+            'Tag 2wqeqw22',
+            'Tag 333',
+            'Tag x qeqw111',
+            'Tag 222',
+            'Tag 333',
+          ],
         },
         {
           id: 222,
@@ -220,7 +226,7 @@ export default class KinopoiskAPI {
     };
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 2000);
+      setTimeout(resolve, DEBUG_DELAY);
     });
 
     return this.respObj;

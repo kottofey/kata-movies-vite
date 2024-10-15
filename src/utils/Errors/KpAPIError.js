@@ -4,8 +4,8 @@ export default class KpAPIError extends Error {
     const kpResponse = JSON.parse(kpErrorResponse);
 
     this.name = message;
-    this.error = kpResponse.error;
+    this.error = kpResponse.error || kpResponse.message;
     this.statusCode = kpResponse.statusCode;
-    this.message = kpResponse.message.join(' ');
+    this.message = kpResponse.message;
   }
 }

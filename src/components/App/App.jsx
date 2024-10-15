@@ -59,8 +59,6 @@ export default class App extends Component {
         })
         .catch((e) => {
           this.setState(() => {
-            console.log('Error!');
-
             return {
               error: {
                 isError: true,

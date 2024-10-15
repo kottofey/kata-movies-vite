@@ -86,9 +86,9 @@
         "caseSensitive": false
       }
     ],
-    "no-console": "off",
-    "no-alert": "off",
-    "no-debugger": "off",
+    "no-console": "error",
+    "no-alert": "error",
+    "no-debugger": "error",
     "no-unused-vars": "warn",
     "no-inline-comments": "error",
     "jsx-a11y/control-has-associated-label": "off",

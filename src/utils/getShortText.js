@@ -1,4 +1,4 @@
-export default function gSetShortText(description, position) {
-  const pos = description.indexOf(' ', position);
-  return pos === -1 ? description : `${description.slice(0, pos)}...`;
+export default function gSetShortText(text, positionToCut) {
+  const pos = text.indexOf(' ', positionToCut);
+  return pos === -1 ? text : `${text.slice(0, pos)}...`;
 }

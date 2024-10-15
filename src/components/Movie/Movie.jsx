@@ -60,10 +60,13 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
     rating.filmCritics ||
     rating.russianFilmCritics;
 
-  const shortDescription = getShortText(description, 180);
+  const shortDescription = getShortText(
+    description || 'Описание отсутствует',
+    180
+  );
   const ratingRounded = Math.round(singleRating * 10) / 10;
   const ratingColor = calcRatingColor(ratingRounded);
-  const shortName = getShortText(name, 80);
+  const shortName = getShortText(name || 'Название отсутствует', 80);
 
   const styles = {
     card: {
@@ -97,11 +100,8 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
         margin: '8px 0 0 8px',
       },
       title: {
-        // backgroundColor: 'darkred',
         margin: '8px 0 0 12px',
         paddingRight: 44,
-        // width: 200,
-        // height: 40,
         overflow: 'hidden',
         fontWeight: 'bold',
         fontSize: 15,
@@ -109,19 +109,13 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
         lineHeight: 1.2,
       },
       year: {
-        // backgroundColor: 'tomato',
         margin: '0 0 0 12px',
-        // height: 28,
-        // marginBottom: 4,
       },
       tags: {
-        // backgroundColor: 'pink',
-        height: 26,
-        margin: '0 0 0 12px',
-        display: 'flex',
-        alignItems: 'center',
+        padding: '0 10px',
+        margin: 0,
       },
-      desc: { padding: 8 },
+      desc: { padding: 8, height: 95 },
       stars: {},
     },
     regular: {
@@ -129,37 +123,33 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
         display: 'block',
         width: 180,
         height: 280,
-        // backgroundColor: 'tomato',
       },
       title: {
         padding: '10px 38px 0 10px',
-        // margin: 0,
+        margin: 0,
         maxHeight: 62,
         overflow: 'hidden',
         fontWeight: 'bold',
         fontSize: 20,
         fontFamily: 'Inter UI',
         lineHeight: 1.2,
-        // backgroundColor: 'pink',
       },
       year: {
         padding: '0 10px',
-        // marginBottom: 0,
-        // backgroundColor: 'lightgreen',
+        margin: 0,
       },
       tags: {
         padding: '0 10px',
-        // marginBottom: 0,
-        // backgroundColor: 'skyblue',
+        margin: 0,
       },
       desc: {
         padding: '0 10px',
-        // marginBottom: 'auto',
-        // backgroundColor: 'brown',
+        height: 110,
+        margin: 0,
       },
       stars: {
-        marginLeft: 18,
-        // backgroundColor: 'gold',
+        margin: 'auto 0 18px 18px',
+        display: 'flex',
       },
     },
   };
@@ -181,7 +171,6 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
       </div>
 
       <Row gutter={[{ sm: 0, xs: 0 }, 0]}>
-        {/* <Row gutter={[{ sm: 0, xs: 10 }, 8]}> */}
         <Col
           sm={9}
           xs={4}
@@ -200,6 +189,7 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
         <Col
           sm={15}
           xs={20}
+          style={{ display: 'flex', flexDirection: 'column' }}
         >
           <Paragraph
             className='movie__title'
@@ -260,7 +250,7 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
               <Paragraph
                 ellipsis={{
                   tooltip: description,
-                  rows: 5,
+                  rows: 4,
                 }}
                 style={styles.mobile.desc}
               >
