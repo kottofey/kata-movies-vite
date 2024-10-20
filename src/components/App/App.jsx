@@ -3,7 +3,8 @@ import { Component } from 'react';
 import { debounce } from 'lodash';
 
 import MoviesList from '../MoviesList';
-import KinopoiskAPI from '../../utils/debugAPI';
+// import KinopoiskAPI from '../../utils/DebugAPI';
+import KinopoiskAPI from '../../utils/KinopoiskAPI';
 import updateCustomRating from '../../utils/updateCustomRating';
 
 export default class App extends Component {
@@ -22,6 +23,17 @@ export default class App extends Component {
   };
 
   kpAPI = new KinopoiskAPI();
+
+  componentDidMount() {
+    const ratedDocs =
+      JSON.parse(localStorage.getItem('ratedDocs')) || [];
+
+    this.setState({
+      ratedMoviesList: {
+        docs: [...ratedDocs],
+      },
+    });
+  }
 
   componentDidUpdate(prevProps, prevState) {
     const {
@@ -82,7 +94,7 @@ export default class App extends Component {
 
   onSearchDebounced = debounce(this.onSearch, 400);
 
-  onRatingChange = (id, r) => {
+  onRatingChange = (id, rating) => {
     this.setState(({ moviesList, ratedMoviesList }) => {
       const newMoviesList = structuredClone(moviesList);
       const newRatedList = structuredClone(ratedMoviesList);
@@ -93,23 +105,26 @@ export default class App extends Component {
       const idx = docs.findIndex((item) => item.id === id);
       const ratedIdx = ratedDocs.findIndex((item) => item.id === id);
 
-      if (r === 0) {
+      if (rating === 0) {
         delete docs[idx].customRating;
+        ratedDocs = [
+          ...ratedDocs.slice(0, ratedIdx),
+          ...ratedDocs.slice(ratedIdx + 1),
+        ];
+
+        localStorage.setItem('ratedDocs', JSON.stringify(ratedDocs));
+
         return {
           ratedMoviesList: {
-            docs: [
-              ...ratedDocs.slice(0, ratedIdx),
-              ...ratedDocs.slice(ratedIdx + 1),
-            ],
+            docs: ratedDocs,
             page,
             total,
           },
           moviesList: { docs, page, total },
-          savedSearch: { docs, page, total },
         };
       }
 
-      docs[idx].customRating = r;
+      docs[idx].customRating = rating;
 
       if (ratedIdx < 0) {
         ratedDocs = [...ratedDocs, docs[idx]];
@@ -117,10 +132,11 @@ export default class App extends Component {
         ratedDocs[ratedIdx] = docs[idx];
       }
 
+      localStorage.setItem('ratedDocs', JSON.stringify(ratedDocs));
+
       return {
         ratedMoviesList: { docs: ratedDocs, page, total },
         moviesList: { docs, page, total },
-        savedSearch: { docs, page, total },
       };
     });
   };
@@ -139,7 +155,6 @@ export default class App extends Component {
         return {
           moviesList: savedSearch,
           tabSelected: tabId,
-          page: 1,
         };
       });
     }
