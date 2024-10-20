@@ -3,7 +3,7 @@ import { Component } from 'react';
 import { debounce } from 'lodash';
 
 import MoviesList from '../MoviesList';
-import KinopoiskAPI from '../../utils/KinopoiskAPI';
+import KinopoiskAPI from '../../utils/debugAPI';
 import updateCustomRating from '../../utils/updateCustomRating';
 
 export default class App extends Component {
@@ -80,7 +80,7 @@ export default class App extends Component {
     });
   };
 
-  onSearchDebounced = debounce(this.onSearch, 1000);
+  onSearchDebounced = debounce(this.onSearch, 400);
 
   onRatingChange = (id, r) => {
     this.setState(({ moviesList, ratedMoviesList }) => {
@@ -156,8 +156,8 @@ export default class App extends Component {
 
   render() {
     const {
-      isLoaded,
       error,
+      isLoaded,
       moviesList,
       ratedMoviesList,
       pageSize,
@@ -205,7 +205,6 @@ export default class App extends Component {
                   placeholder='Type to search...'
                   style={{
                     width: '90vw',
-                    // minWidth: 482,
                     maxWidth: 990,
                     marginBottom: 18,
                   }}
@@ -224,12 +223,12 @@ export default class App extends Component {
         <MoviesList
           moviesList={moviesList}
           ratedMoviesList={ratedMoviesList}
-          onRatingChange={this.onRatingChange}
           error={error}
           isLoaded={isLoaded}
           isMobile={window.innerWidth < 576}
           pageSize={pageSize}
           tabSelected={tabSelected}
+          onRatingChange={this.onRatingChange}
           onPaginationChange={this.onPaginationChange}
         />
       </>

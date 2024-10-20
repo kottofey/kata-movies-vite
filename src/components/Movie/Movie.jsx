@@ -18,30 +18,11 @@ const { Paragraph } = Typography;
 
 export default function Movie({
   movie,
-  isLoaded,
-  isMobile,
-  error,
   onRatingChange,
+  isMobile,
+  isLoaded,
+  error,
 }) {
-  return (
-    <Flex className='movie'>
-      {isLoaded ? (
-        <MovieCardContent
-          movie={movie}
-          onRatingChange={onRatingChange}
-          isMobile={isMobile}
-        />
-      ) : (
-        <Spinner
-          size='large'
-          spinning={!error.isError}
-        />
-      )}
-    </Flex>
-  );
-}
-
-function MovieCardContent({ movie, onRatingChange, isMobile }) {
   const {
     id,
     altName,
@@ -162,122 +143,135 @@ function MovieCardContent({ movie, onRatingChange, isMobile }) {
         body: styles.card.body,
       }}
     >
-      <div
-        style={{
-          ...styles.rating,
-        }}
-      >
-        {ratingRounded}
-      </div>
-
-      <Row gutter={[{ sm: 0, xs: 0 }, 0]}>
-        <Col
-          sm={9}
-          xs={4}
-        >
-          <Image
-            alt={`Movie poster for ${altName}`}
-            src={poster.url || ''}
-            preview={{ src: poster.previewUrl || '' }}
-            fallback='https://fakeimg.pl/180x280/?text=No%0APreview%0AAvailable&font=lobster'
-            placeholder={<Spinner size='small' />}
-            style={
-              isMobile ? styles.mobile.poster : styles.regular.poster
-            }
-          />
-        </Col>
-        <Col
-          sm={15}
-          xs={20}
-          style={{ display: 'flex', flexDirection: 'column' }}
-        >
-          <Paragraph
-            className='movie__title'
-            ellipsis={{
-              tooltip: name,
-              rows: 2,
+      {!isLoaded ? (
+        <Spinner
+          size='large'
+          spinning={!error.isError}
+        />
+      ) : (
+        <>
+          <div
+            style={{
+              ...styles.rating,
             }}
-            style={
-              isMobile ? styles.mobile.title : styles.regular.title
-            }
           >
-            {shortName}
-          </Paragraph>
-          <Paragraph
-            className='movie__date'
-            style={
-              isMobile ? styles.mobile.year : styles.regular.year
-            }
-            type='secondary'
-          >
-            {year}
-          </Paragraph>
-          <Paragraph
-            className='movie__tags'
-            style={
-              isMobile ? styles.mobile.tags : styles.regular.tags
-            }
-          >
-            {tags.map((tag) => (
-              <Tag key={`tag${tag}`}>{tag}</Tag>
-            ))}
-          </Paragraph>
-          {!isMobile && (
-            <>
-              <Paragraph
-                ellipsis={{
-                  tooltip: description,
-                  rows: 5,
-                }}
-                style={styles.regular.desc}
-              >
-                {shortDescription}
-              </Paragraph>
-              <Rate
-                style={styles.regular.stars}
-                allowClear
-                defaultValue={0}
-                value={customRating || 0}
-                count={10}
-                onChange={(r) => onRatingChange(id, r)}
+            {ratingRounded}
+          </div>
+
+          <Row gutter={[{ sm: 0, xs: 0 }, 0]}>
+            <Col
+              sm={9}
+              xs={4}
+            >
+              <Image
+                alt={`Movie poster for ${altName}`}
+                src={poster.url || ''}
+                preview={{ src: poster.previewUrl || '' }}
+                fallback='https://fakeimg.pl/180x280/?text=No%0APreview%0AAvailable&font=lobster'
+                placeholder={<Spinner size='small' />}
+                style={
+                  isMobile
+                    ? styles.mobile.poster
+                    : styles.regular.poster
+                }
               />
-            </>
-          )}
-        </Col>
-        {isMobile && (
-          <>
-            <Col span={24}>
-              <Paragraph
-                ellipsis={{
-                  tooltip: description,
-                  rows: 4,
-                }}
-                style={styles.mobile.desc}
-              >
-                {shortDescription}
-              </Paragraph>
             </Col>
             <Col
-              span={20}
-              push={4}
+              sm={15}
+              xs={20}
+              style={{ display: 'flex', flexDirection: 'column' }}
             >
-              <Rate
-                style={styles.mobile.stars}
-                allowClear
-                defaultValue={0}
-                value={customRating || 0}
-                count={10}
-                onChange={(r) => onRatingChange(id, r)}
-              />
+              <Paragraph
+                className='movie__title'
+                ellipsis={{
+                  tooltip: name,
+                  rows: 2,
+                }}
+                style={
+                  isMobile
+                    ? styles.mobile.title
+                    : styles.regular.title
+                }
+              >
+                {shortName}
+              </Paragraph>
+              <Paragraph
+                className='movie__date'
+                style={
+                  isMobile ? styles.mobile.year : styles.regular.year
+                }
+                type='secondary'
+              >
+                {year}
+              </Paragraph>
+              <Paragraph
+                className='movie__tags'
+                style={
+                  isMobile ? styles.mobile.tags : styles.regular.tags
+                }
+              >
+                {tags.map((tag) => (
+                  <Tag key={`tag${tag}`}>{tag}</Tag>
+                ))}
+              </Paragraph>
+              {!isMobile && (
+                <>
+                  <Paragraph
+                    ellipsis={{
+                      tooltip: description,
+                      rows: 5,
+                    }}
+                    style={styles.regular.desc}
+                  >
+                    {shortDescription}
+                  </Paragraph>
+                  <Rate
+                    style={styles.regular.stars}
+                    allowClear
+                    defaultValue={0}
+                    value={customRating || 0}
+                    count={10}
+                    onChange={(r) => onRatingChange(id, r)}
+                  />
+                </>
+              )}
             </Col>
-          </>
-        )}
-      </Row>
+            {isMobile && (
+              <>
+                <Col span={24}>
+                  <Paragraph
+                    ellipsis={{
+                      tooltip: description,
+                      rows: 4,
+                    }}
+                    style={styles.mobile.desc}
+                  >
+                    {shortDescription}
+                  </Paragraph>
+                </Col>
+                <Col
+                  span={20}
+                  push={4}
+                >
+                  <Rate
+                    style={styles.mobile.stars}
+                    allowClear
+                    defaultValue={0}
+                    value={customRating || 0}
+                    count={10}
+                    onChange={(r) => onRatingChange(id, r)}
+                  />
+                </Col>
+              </>
+            )}
+          </Row>
+        </>
+      )}
     </Card>
   );
 }
 
-MovieCardContent.propTypes = {
+Movie.propTypes = {
   movie: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string,
