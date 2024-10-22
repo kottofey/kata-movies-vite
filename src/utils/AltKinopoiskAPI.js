@@ -2,16 +2,16 @@ import KpAPIError from './Errors/KpAPIError';
 import NoInternetError from './Errors/NoInternetError';
 import KPEmptyResponseError from './Errors/KPEmptyResponseError';
 
-const KP_API_KEY = 'C3N95B6-J6MMZT5-HX88DKF-BCDKVQ4';
+const KP_API_KEY = 'f82dcc4b-36a2-450c-93b6-e67bb0d0f0b2';
 
 export default class KinopoiskAPI {
   constructor() {
     this.respObj = {};
   }
 
-  BASE_API_URL = 'https://api.kinopoisk.dev/v1.4/movie/search';
+  BASE_API_URL = 'https://kinopoiskapiunofficial.tech/api/v2.1';
 
-  searchMovies = async (keyword, pageSize, page) => {
+  searchMovies = async (keyword, page, pageSize = 20) => {
     if (!navigator.onLine)
       throw new NoInternetError('Упс... Нету интернету...');
 
@@ -19,9 +19,10 @@ export default class KinopoiskAPI {
       return { docs: [] };
     }
 
-    const url = new URL(this.BASE_API_URL);
-    url.searchParams.set('query', keyword);
-    url.searchParams.set('limit', pageSize.toString());
+    const url = new URL(
+      `${this.BASE_API_URL}/films/search-by-keyword`
+    );
+    url.searchParams.set('keyword', keyword);
     url.searchParams.set('page', page.toString());
 
     let response = await fetch(url, {
@@ -42,25 +43,29 @@ export default class KinopoiskAPI {
     response = await response.json();
     if (response.total === 0) throw new KPEmptyResponseError();
 
-    this.respObj.docs = response.docs.map((movie) => ({
-      id: movie.id,
-      name: movie.name || movie.alternativeName,
+    this.respObj.docs = response.films.map((movie) => ({
+      id: movie.filmId,
+      name: movie.nameRu || movie.nameEn,
       year: movie.year,
       description: movie.description,
-      poster: movie.poster || '',
-      rating: {
-        kp: movie.rating.kp,
-        imdb: movie.rating.imdb,
-        filmCritics: movie.rating.filmCritics,
-        russianFilmCritics: movie.rating.russianFilmCritics,
+      poster: {
+        url: movie.posterUrl || '',
+        previewUrl: movie.posterUrlPreview || '',
       },
-      tags: movie.genres.map((genre) => genre.name),
+      rating: {
+        kp:
+          movie.rating === 'null'
+            ? '0'
+            : Number.parseInt(movie.rating, 10),
+      },
+      tags: movie.genres.map((genre) => genre.genre),
     }));
 
     this.respObj = {
       ...this.respObj,
-      total: response.total,
-      page: response.page,
+      total: response.searchFilmsCountResult,
+      altKP: true,
+      page,
     };
     return this.respObj;
   };

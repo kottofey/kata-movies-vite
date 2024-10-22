@@ -12,7 +12,7 @@ export default function MoviesList({
   tabSelected,
   onPaginationChange,
 }) {
-  const { docs } = moviesList;
+  const { docs, altKP } = moviesList;
   return (
     <>
       <div
@@ -59,8 +59,8 @@ export default function MoviesList({
         <Pagination
           align='center'
           hideOnSinglePage
-          pageSizeOptions={[6, 12, 24, 48]}
-          pageSize={pageSize}
+          pageSizeOptions={altKP ? [20] : [6, 12, 24, 48]}
+          pageSize={altKP ? 20 : pageSize}
           defaultCurrent={1}
           total={tabSelected === 'search' && moviesList.total}
           current={moviesList.page}
