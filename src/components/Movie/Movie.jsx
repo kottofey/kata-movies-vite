@@ -25,7 +25,6 @@ export default function Movie({
 }) {
   const {
     id,
-    altName,
     poster,
     name,
     year,
@@ -42,7 +41,7 @@ export default function Movie({
     rating.russianFilmCritics;
 
   const shortDescription = getShortText(
-    description || 'Описание отсутствует',
+    description || 'Описание отсутствует. Даже английское.',
     180
   );
   const ratingRounded = Math.round(singleRating * 10) / 10;
@@ -164,7 +163,7 @@ export default function Movie({
               xs={4}
             >
               <Image
-                alt={`Movie poster for ${altName}`}
+                alt={`Movie poster for ${name}`}
                 src={poster.url || ''}
                 preview={{ src: poster.previewUrl || '' }}
                 fallback='https://fakeimg.pl/180x280/?text=No%0APreview%0AAvailable&font=lobster'

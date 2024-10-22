@@ -9,7 +9,7 @@ export default class KinopoiskAPI {
     this.respObj = {};
   }
 
-  BASE_API_URL = 'https://api.kinopoisk.dev/v1.4';
+  BASE_API_URL = 'https://api.kinopoisk.dev/v1.4/movie/search';
 
   searchMovies = async (keyword, pageSize, page) => {
     if (!navigator.onLine)
@@ -19,7 +19,7 @@ export default class KinopoiskAPI {
       return { docs: [] };
     }
 
-    const url = new URL(`${this.BASE_API_URL}/movie/search`);
+    const url = new URL(this.BASE_API_URL);
     url.searchParams.set('query', keyword);
     url.searchParams.set('limit', pageSize.toString());
     url.searchParams.set('page', page.toString());
