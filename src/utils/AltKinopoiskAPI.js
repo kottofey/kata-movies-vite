@@ -46,7 +46,7 @@ export default class KinopoiskAPI {
     this.respObj.docs = response.films.map((movie) => ({
       id: movie.filmId,
       name: movie.nameRu || movie.nameEn,
-      year: movie.year,
+      year: Number.parseInt(movie.year, 10),
       description: movie.description,
       poster: {
         url: movie.posterUrl || '',

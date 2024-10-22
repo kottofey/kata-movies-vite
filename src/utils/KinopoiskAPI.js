@@ -47,7 +47,7 @@ export default class KinopoiskAPI {
       name: movie.name || movie.alternativeName,
       year: movie.year,
       description: movie.description,
-      poster: movie.poster || '',
+      poster: { ...movie.poster } || '',
       rating: {
         kp: movie.rating.kp,
         imdb: movie.rating.imdb,

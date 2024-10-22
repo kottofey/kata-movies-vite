@@ -1,53 +1,46 @@
-import { Input, Tabs, Alert } from 'antd';
+import { Input, Tabs, Alert, Button } from 'antd';
 import { Component } from 'react';
 import { debounce } from 'lodash';
 
 import MoviesList from '../MoviesList';
-// import KinopoiskAPI from '../../utils/DebugAPI';
-import KinopoiskAPI from '../../utils/KinopoiskAPI';
 import updateCustomRating from '../../utils/updateCustomRating';
+import KinopoiskAPI from '../../utils/KinopoiskAPI';
 
 export default class App extends Component {
   state = {
     search: '',
-    pageSize: 6,
     tabSelected: 'search',
     isLoaded: true,
     error: {
       isError: false,
       errorObj: {},
     },
-    moviesList: { docs: [], total: 0, page: undefined },
-    ratedMoviesList: { docs: [], total: 0, page: undefined },
-    savedSearch: { docs: [], total: 0, page: undefined },
+    moviesList: { docs: [], page: 1, pageSize: 6 },
+    ratedMoviesList: {},
   };
 
   kpAPI = new KinopoiskAPI();
 
   componentDidMount() {
-    const ratedDocs =
-      JSON.parse(localStorage.getItem('ratedDocs')) || [];
-
+    const ratedMoviesList = JSON.parse(
+      localStorage.getItem('ratedMoviesList')
+    ) || { docs: [], page: 1, total: 0, pageSize: 6 };
     this.setState({
-      ratedMoviesList: {
-        docs: [...ratedDocs],
-      },
+      ratedMoviesList,
     });
   }
 
   componentDidUpdate(prevProps, prevState) {
     const {
       search,
-      pageSize,
-      moviesList: { page },
+      moviesList: { pageSize, page },
       tabSelected,
       ratedMoviesList,
     } = this.state;
 
     const {
       search: prevSearch,
-      pageSize: prevPageSize,
-      moviesList: { page: prevPage },
+      moviesList: { page: prevPage, pageSize: prevPageSize },
       tabSelected: prevTabSelected,
     } = prevState;
 
@@ -65,8 +58,7 @@ export default class App extends Component {
           const updList = updateCustomRating(res, ratedMoviesList);
           this.setState({
             isLoaded: true,
-            moviesList: { ...updList, page },
-            savedSearch: { ...updList, page: 1 },
+            moviesList: { ...updList, page, pageSize },
           });
         })
         .catch((e) => {
@@ -99,7 +91,7 @@ export default class App extends Component {
       const newMoviesList = structuredClone(moviesList);
       const newRatedList = structuredClone(ratedMoviesList);
 
-      const { docs, page, total } = newMoviesList;
+      const { docs, page } = newMoviesList;
       let { docs: ratedDocs } = newRatedList;
 
       const idx = docs.findIndex((item) => item.id === id);
@@ -112,15 +104,22 @@ export default class App extends Component {
           ...ratedDocs.slice(ratedIdx + 1),
         ];
 
-        localStorage.setItem('ratedDocs', JSON.stringify(ratedDocs));
+        localStorage.setItem(
+          'ratedMoviesList',
+          JSON.stringify({
+            ...ratedMoviesList,
+            docs: ratedDocs,
+            total: ratedDocs.length,
+          })
+        );
 
         return {
           ratedMoviesList: {
+            ...ratedMoviesList,
             docs: ratedDocs,
-            page,
-            total,
+            total: ratedDocs.length,
           },
-          moviesList: { docs, page, total },
+          moviesList: { ...moviesList, docs, page },
         };
       }
 
@@ -132,40 +131,42 @@ export default class App extends Component {
         ratedDocs[ratedIdx] = docs[idx];
       }
 
-      localStorage.setItem('ratedDocs', JSON.stringify(ratedDocs));
+      localStorage.setItem(
+        'ratedMoviesList',
+        JSON.stringify({
+          ...ratedMoviesList,
+          docs: ratedDocs,
+          total: ratedDocs.length,
+        })
+      );
 
       return {
-        ratedMoviesList: { docs: ratedDocs, page, total },
-        moviesList: { docs, page, total },
+        ratedMoviesList: {
+          ...ratedMoviesList,
+          docs: ratedDocs,
+          total: ratedDocs.length,
+        },
+        moviesList: { ...moviesList, docs, page },
       };
     });
   };
 
-  onTabClick = (tabId) => {
-    if (tabId === 'rated') {
-      this.setState(({ moviesList, ratedMoviesList }) => {
-        return {
-          savedSearch: moviesList,
-          moviesList: ratedMoviesList,
-          tabSelected: tabId,
-        };
-      });
-    } else {
-      this.setState(({ savedSearch }) => {
-        return {
-          moviesList: savedSearch,
-          tabSelected: tabId,
-        };
-      });
-    }
+  onPaginationChange = (page, pageSize) => {
+    const { tabSelected } = this.state;
+
+    this.setState(({ moviesList, ratedMoviesList }) => {
+      if (tabSelected === 'search') {
+        return { moviesList: { ...moviesList, pageSize, page } };
+      }
+      return {
+        ratedMoviesList: { ...ratedMoviesList, page, pageSize },
+      };
+    });
   };
 
-  onPaginationChange = (pg, pgSize) => {
-    this.setState(({ moviesList }) => {
-      return {
-        moviesList: { ...moviesList, page: pg },
-        pageSize: pgSize,
-      };
+  onTabChange = (tab) => {
+    this.setState({
+      tabSelected: tab,
     });
   };
 
@@ -175,12 +176,21 @@ export default class App extends Component {
       isLoaded,
       moviesList,
       ratedMoviesList,
-      pageSize,
       tabSelected,
     } = this.state;
 
     return (
       <>
+        <Button
+          onClick={() => {
+            localStorage.clear();
+            window.location.reload();
+          }}
+          color='danger'
+          variant='solid'
+        >
+          Clear localStorage
+        </Button>
         {error.isError && (
           <Alert
             type='error'
@@ -210,41 +220,52 @@ export default class App extends Component {
             alignItems: 'center',
             width: '100%',
           }}
-          onTabClick={(tabId) => this.onTabClick(tabId)}
+          onChange={(tab) => this.onTabChange(tab)}
           items={[
             {
               key: 'search',
               label: 'Search',
               children: (
-                <Input
-                  placeholder='Type to search...'
-                  style={{
-                    width: '90vw',
-                    maxWidth: 990,
-                    marginBottom: 18,
-                  }}
-                  onChange={(e) => {
-                    this.onSearchDebounced(e.target.value);
-                  }}
-                />
+                <>
+                  <Input
+                    placeholder='Type to search...'
+                    style={{
+                      width: '90vw',
+                      maxWidth: 990,
+                      marginBottom: 18,
+                    }}
+                    onChange={(e) => {
+                      this.onSearchDebounced(e.target.value);
+                    }}
+                  />
+                  <MoviesList
+                    moviesList={moviesList}
+                    error={error}
+                    isLoaded={isLoaded}
+                    isMobile={window.innerWidth < 576}
+                    tabSelected={tabSelected}
+                    onRatingChange={this.onRatingChange}
+                    onPaginationChange={this.onPaginationChange}
+                  />
+                </>
               ),
             },
             {
               key: 'rated',
               label: 'Rated',
+              children: (
+                <MoviesList
+                  moviesList={ratedMoviesList}
+                  isMobile={window.innerWidth < 576}
+                  isLoaded={isLoaded}
+                  error={error}
+                  tabSelected={tabSelected}
+                  onRatingChange={this.onRatingChange}
+                  onPaginationChange={this.onPaginationChange}
+                />
+              ),
             },
           ]}
-        />
-        <MoviesList
-          moviesList={moviesList}
-          ratedMoviesList={ratedMoviesList}
-          error={error}
-          isLoaded={isLoaded}
-          isMobile={window.innerWidth < 576}
-          pageSize={pageSize}
-          tabSelected={tabSelected}
-          onRatingChange={this.onRatingChange}
-          onPaginationChange={this.onPaginationChange}
         />
       </>
     );

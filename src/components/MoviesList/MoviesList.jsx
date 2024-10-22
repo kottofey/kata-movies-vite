@@ -1,4 +1,4 @@
-import { ConfigProvider, Pagination } from 'antd';
+import { ConfigProvider, Empty, Pagination } from 'antd';
 
 import Movie from '../Movie';
 
@@ -8,10 +8,16 @@ export default function MoviesList({
   isLoaded,
   isMobile,
   onRatingChange,
-  pageSize,
   onPaginationChange,
 }) {
-  const { docs, altKP } = moviesList;
+  const { docs, altKP, page, total, pageSize } = moviesList;
+  if (!docs.length)
+    return (
+      <Empty
+        description='No Movies Here'
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+      />
+    );
   return (
     <>
       <div className='moviesList'>
@@ -46,12 +52,13 @@ export default function MoviesList({
       >
         <Pagination
           align='center'
-          hideOnSinglePage
+          hideOnSinglePage={false}
+          showSizeChanger
           pageSizeOptions={altKP ? [20] : [6, 12, 24, 48]}
           pageSize={altKP ? 20 : pageSize}
           defaultCurrent={1}
-          total={tabSelected === 'search' && moviesList.total}
-          current={moviesList.page}
+          total={total}
+          current={page}
           style={{ margin: '10px auto' }}
           onChange={(pg, pgSize) => onPaginationChange(pg, pgSize)}
         />
