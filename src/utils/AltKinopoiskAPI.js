@@ -11,7 +11,7 @@ export default class KinopoiskAPI {
 
   BASE_API_URL = 'https://kinopoiskapiunofficial.tech/api/v2.1';
 
-  searchMovies = async (keyword, page, pageSize = 20) => {
+  searchMovies = async (keyword, page) => {
     if (!navigator.onLine)
       throw new NoInternetError('Упс... Нету интернету...');
 

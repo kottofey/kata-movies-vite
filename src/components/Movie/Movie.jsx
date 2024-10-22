@@ -1,14 +1,5 @@
 import PropTypes from 'prop-types';
-import {
-  Typography,
-  Flex,
-  Tag,
-  Card,
-  Image,
-  Rate,
-  Row,
-  Col,
-} from 'antd';
+import { Typography, Tag, Card, Image, Rate, Row, Col } from 'antd';
 
 import Spinner from '../Spinner';
 import calcRatingColor from '../../utils/CalcRatingColor';

@@ -9,24 +9,12 @@ export default function MoviesList({
   isMobile,
   onRatingChange,
   pageSize,
-  tabSelected,
   onPaginationChange,
 }) {
   const { docs, altKP } = moviesList;
   return (
     <>
-      <div
-        className='moviesList'
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          width: '90vw',
-          maxWidth: 1010,
-          justifyContent: 'center',
-          margin: '0 auto',
-          gap: 24,
-        }}
-      >
+      <div className='moviesList'>
         {docs.map((movie) => {
           const { id } = movie;
 

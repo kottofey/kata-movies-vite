@@ -1,9 +1,9 @@
 .moviesList {
-  //width: 1010px;
-  //display: flex;
-  //justify-content: center;
-  //margin: 0 auto;
-  //border: 1px solid #c70000;
-  //flex-wrap: wrap;
-  //gap: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  width: 90vw;
+  max-width: 1010px;
+  justify-content: center;
+  margin: 0 auto;
+  gap: 24px;
 }
