@@ -43,30 +43,9 @@ export default class KinopoiskAPI {
     response = await response.json();
     if (response.total === 0) throw new KPEmptyResponseError();
 
-    this.respObj.docs = response.films.map((movie) => ({
-      id: movie.filmId,
-      name: movie.nameRu || movie.nameEn,
-      year: Number.parseInt(movie.year, 10),
-      description: movie.description,
-      poster: {
-        url: movie.posterUrl || '',
-        previewUrl: movie.posterUrlPreview || '',
-      },
-      rating: {
-        kp:
-          movie.rating === 'null'
-            ? '0'
-            : Number.parseInt(movie.rating, 10),
-      },
-      tags: movie.genres.map((genre) => genre.genre),
-    }));
+    response.altKP = true;
+    response.page = page;
 
-    this.respObj = {
-      ...this.respObj,
-      total: response.searchFilmsCountResult,
-      altKP: true,
-      page,
-    };
-    return this.respObj;
+    return response;
   };
 }

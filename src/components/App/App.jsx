@@ -1,11 +1,13 @@
-import { Input, Tabs, Alert, Button, Space, Modal } from 'antd';
+import { Input, Tabs, Alert, Radio } from 'antd';
 import { Component } from 'react';
 import { debounce } from 'lodash';
 
 import MoviesList from '../MoviesList';
 import updateCustomRating from '../../utils/updateCustomRating';
 import KinopoiskAPI from '../../api/KinopoiskAPI';
+import AltKinopoiskAPI from '../../api/AltKinopoiskAPI';
 import paginateList from '../../utils/paginateList';
+import KpAPITransform from '../../api/KpAPITransform';
 
 export default class App extends Component {
   state = {
@@ -18,6 +20,7 @@ export default class App extends Component {
     },
     moviesList: { docs: [] },
     ratedMoviesList: { docs: [] },
+    api: 'KP',
   };
 
   kpAPI = new KinopoiskAPI();
@@ -40,13 +43,23 @@ export default class App extends Component {
       moviesList: { pageSize = 12, page },
       tabSelected,
       ratedMoviesList,
+      api,
     } = this.state;
 
     const {
       search: prevSearch,
       moviesList: { page: prevPage, pageSize: prevPageSize },
       tabSelected: prevTabSelected,
+      api: prevApi,
     } = prevState;
+
+    if (api !== prevApi) {
+      if (api === 'KP') {
+        this.kpAPI = new KinopoiskAPI();
+      } else if (api === 'altKP') {
+        this.kpAPI = new AltKinopoiskAPI();
+      }
+    }
 
     if (
       search !== prevSearch ||
@@ -59,7 +72,10 @@ export default class App extends Component {
       this.kpAPI
         .searchMovies(search, pageSize, page)
         .then((res) => {
-          const updList = updateCustomRating(res, ratedMoviesList);
+          const updList = updateCustomRating(
+            KpAPITransform(res),
+            ratedMoviesList
+          );
           this.setState({
             isLoaded: true,
             moviesList: {
@@ -202,84 +218,21 @@ export default class App extends Component {
 
     return (
       <>
-        <Modal
-          centered
-          closable
-          open={this.state.modalOpened}
-          onOk={() => this.setState({ modalOpened: false })}
-          onCancel={() => this.setState({ modalOpened: false })}
-        >
-          <pre>{this.state.modalContent}</pre>
-        </Modal>
-        <Space
-          style={{
-            position: 'fixed',
-            zIndex: 1,
-            display: 'flex',
-            flexDirection: 'column',
+        <Radio.Group
+          defaultValue='KP'
+          size='small'
+          buttonStyle='solid'
+          onChange={(e) => {
+            this.setState(() => {
+              return {
+                api: e.target.value,
+              };
+            });
           }}
         >
-          <Button
-            onClick={() => {
-              this.setState({
-                modalOpened: true,
-                modalContent: JSON.stringify(
-                  paginateList(ratedMoviesList, page, pageSize),
-                  null,
-                  2
-                ),
-              });
-            }}
-            color='primary'
-            variant='solid'
-            size='small'
-          >
-            Show pag rated
-          </Button>
-          <Button
-            onClick={() => {
-              this.setState({
-                modalOpened: true,
-                modalContent: JSON.stringify(moviesList, null, 2),
-              });
-            }}
-            color='primary'
-            variant='solid'
-            size='small'
-          >
-            Show movie list
-          </Button>
-          <Button
-            onClick={() => {
-              this.setState({
-                modalOpened: true,
-                modalContent: JSON.stringify(
-                  JSON.parse(localStorage.getItem('ratedMoviesList')),
-                  null,
-                  2
-                ),
-              });
-            }}
-            color='primary'
-            variant='solid'
-            size='small'
-            style={{ marginTop: 40 }}
-          >
-            Show localStorage
-          </Button>
-          <Button
-            onClick={() => {
-              localStorage.clear();
-              window.location.reload();
-            }}
-            color='danger'
-            variant='solid'
-            size='small'
-          >
-            Clear localStorage
-          </Button>
-        </Space>
-
+          <Radio.Button value='KP'>API</Radio.Button>
+          <Radio.Button value='altKP'>altAPI</Radio.Button>
+        </Radio.Group>
         {error.isError && (
           <Alert
             type='error'

@@ -25,11 +25,13 @@ export default function Movie({
     tags,
   } = movie;
 
-  const singleRating =
+  let singleRating =
     rating.kp ||
     rating.imdb ||
     rating.filmCritics ||
     rating.russianFilmCritics;
+
+  singleRating = !singleRating ? 0 : singleRating;
 
   const shortDescription = getShortText(
     description || 'Описание отсутствует. Даже английское.',
