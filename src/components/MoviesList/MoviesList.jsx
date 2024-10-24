@@ -10,7 +10,7 @@ export default function MoviesList({
   onRatingChange,
   onPaginationChange,
 }) {
-  const { docs, altKP, page, total, pageSize } = moviesList;
+  const { docs, altKP, page = 1, pageSize = 12, total } = moviesList;
   if (!docs.length)
     return (
       <Empty
