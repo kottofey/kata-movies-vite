@@ -1,6 +1,6 @@
-import KpAPIError from './Errors/KpAPIError';
-import NoInternetError from './Errors/NoInternetError';
-import KPEmptyResponseError from './Errors/KPEmptyResponseError';
+import KpAPIError from '../utils/Errors/KpAPIError';
+import NoInternetError from '../utils/Errors/NoInternetError';
+import KPEmptyResponseError from '../utils/Errors/KPEmptyResponseError';
 
 const KP_API_KEY = 'f82dcc4b-36a2-450c-93b6-e67bb0d0f0b2';
 

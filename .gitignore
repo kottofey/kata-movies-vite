@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 src/teest.js
 package-lock.json
-src/utils/api/debug*
+src/api/debug*

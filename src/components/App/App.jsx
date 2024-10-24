@@ -1,10 +1,11 @@
-import { Input, Tabs, Alert, Button } from 'antd';
+import { Input, Tabs, Alert, Button, Space, Modal } from 'antd';
 import { Component } from 'react';
 import { debounce } from 'lodash';
 
 import MoviesList from '../MoviesList';
 import updateCustomRating from '../../utils/updateCustomRating';
-import KinopoiskAPI from '../../utils/KinopoiskAPI';
+import KinopoiskAPI from '../../api/KinopoiskAPI';
+import paginateList from '../../utils/paginateList';
 
 export default class App extends Component {
   state = {
@@ -15,8 +16,8 @@ export default class App extends Component {
       isError: false,
       errorObj: {},
     },
-    moviesList: { docs: [], page: 1, pageSize: 6 },
-    ratedMoviesList: {},
+    moviesList: { docs: [] },
+    ratedMoviesList: { docs: [] },
   };
 
   kpAPI = new KinopoiskAPI();
@@ -24,16 +25,19 @@ export default class App extends Component {
   componentDidMount() {
     const ratedMoviesList = JSON.parse(
       localStorage.getItem('ratedMoviesList')
-    ) || { docs: [], page: 1, total: 0, pageSize: 6 };
-    this.setState({
-      ratedMoviesList,
+    ) || { docs: [], pageSize: 6 };
+
+    this.setState(() => {
+      return {
+        ratedMoviesList,
+      };
     });
   }
 
   componentDidUpdate(prevProps, prevState) {
     const {
       search,
-      moviesList: { pageSize, page },
+      moviesList: { pageSize = 12, page },
       tabSelected,
       ratedMoviesList,
     } = this.state;
@@ -58,7 +62,11 @@ export default class App extends Component {
           const updList = updateCustomRating(res, ratedMoviesList);
           this.setState({
             isLoaded: true,
-            moviesList: { ...updList, page, pageSize },
+            moviesList: {
+              ...updList,
+              page,
+              pageSize,
+            },
           });
         })
         .catch((e) => {
@@ -91,62 +99,68 @@ export default class App extends Component {
       const newMoviesList = structuredClone(moviesList);
       const newRatedList = structuredClone(ratedMoviesList);
 
-      const { docs, page } = newMoviesList;
-      let { docs: ratedDocs } = newRatedList;
+      const { docs } = newMoviesList;
+      let { docs: ratedDocs, page: ratedPage } = newRatedList;
 
       const idx = docs.findIndex((item) => item.id === id);
       const ratedIdx = ratedDocs.findIndex((item) => item.id === id);
 
       if (rating === 0) {
-        delete docs[idx].customRating;
-        ratedDocs = [
-          ...ratedDocs.slice(0, ratedIdx),
-          ...ratedDocs.slice(ratedIdx + 1),
-        ];
+        if (idx !== -1) delete docs[idx].customRating;
+
+        const pagesTotal = Math.ceil(
+          (newRatedList.docs.length - 1) / newRatedList.pageSize
+        );
+        ratedPage = ratedPage > pagesTotal ? pagesTotal : ratedPage;
+
+        const updatedRatedList = {
+          ...ratedMoviesList,
+          docs: [
+            ...ratedDocs.slice(0, ratedIdx),
+            ...ratedDocs.slice(ratedIdx + 1),
+          ],
+          page: ratedPage,
+          total: newRatedList.docs.length - 1,
+        };
 
         localStorage.setItem(
           'ratedMoviesList',
-          JSON.stringify({
-            ...ratedMoviesList,
-            docs: ratedDocs,
-            total: ratedDocs.length,
-          })
+          JSON.stringify(updatedRatedList)
         );
 
         return {
-          ratedMoviesList: {
-            ...ratedMoviesList,
-            docs: ratedDocs,
-            total: ratedDocs.length,
-          },
-          moviesList: { ...moviesList, docs, page },
+          ratedMoviesList: updatedRatedList,
+          moviesList: { ...moviesList, docs },
         };
       }
 
-      docs[idx].customRating = rating;
+      if (docs[idx]) docs[idx].customRating = rating;
 
       if (ratedIdx < 0) {
         ratedDocs = [...ratedDocs, docs[idx]];
-      } else {
+        ratedPage = 1;
+      } else if (docs[idx]) {
         ratedDocs[ratedIdx] = docs[idx];
+      } else {
+        ratedDocs[ratedIdx].customRating = rating;
       }
+
+      const updatedList = {
+        ...ratedMoviesList,
+        docs: ratedDocs,
+        page: ratedPage,
+        pageSize: newRatedList.pageSize,
+        total: ratedDocs.length,
+      };
 
       localStorage.setItem(
         'ratedMoviesList',
-        JSON.stringify({
-          ...ratedMoviesList,
-          docs: ratedDocs,
-          total: ratedDocs.length,
-        })
+        JSON.stringify(updatedList)
       );
 
       return {
-        ratedMoviesList: {
-          ...ratedMoviesList,
-          docs: ratedDocs,
-          total: ratedDocs.length,
-        },
-        moviesList: { ...moviesList, docs, page },
+        ratedMoviesList: updatedList,
+        moviesList: { ...moviesList, docs },
       };
     });
   };
@@ -158,8 +172,13 @@ export default class App extends Component {
       if (tabSelected === 'search') {
         return { moviesList: { ...moviesList, pageSize, page } };
       }
+
       return {
-        ratedMoviesList: { ...ratedMoviesList, page, pageSize },
+        ratedMoviesList: {
+          ...ratedMoviesList,
+          pageSize,
+          page,
+        },
       };
     });
   };
@@ -174,23 +193,93 @@ export default class App extends Component {
     const {
       error,
       isLoaded,
+      tabSelected,
       moviesList,
       ratedMoviesList,
-      tabSelected,
     } = this.state;
+
+    const { page, pageSize } = ratedMoviesList;
 
     return (
       <>
-        <Button
-          onClick={() => {
-            localStorage.clear();
-            window.location.reload();
-          }}
-          color='danger'
-          variant='solid'
+        <Modal
+          centered
+          closable
+          open={this.state.modalOpened}
+          onOk={() => this.setState({ modalOpened: false })}
+          onCancel={() => this.setState({ modalOpened: false })}
         >
-          Clear localStorage
-        </Button>
+          <pre>{this.state.modalContent}</pre>
+        </Modal>
+        <Space
+          style={{
+            position: 'fixed',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <Button
+            onClick={() => {
+              this.setState({
+                modalOpened: true,
+                modalContent: JSON.stringify(
+                  paginateList(ratedMoviesList, page, pageSize),
+                  null,
+                  2
+                ),
+              });
+            }}
+            color='primary'
+            variant='solid'
+            size='small'
+          >
+            Show pag rated
+          </Button>
+          <Button
+            onClick={() => {
+              this.setState({
+                modalOpened: true,
+                modalContent: JSON.stringify(moviesList, null, 2),
+              });
+            }}
+            color='primary'
+            variant='solid'
+            size='small'
+          >
+            Show movie list
+          </Button>
+          <Button
+            onClick={() => {
+              this.setState({
+                modalOpened: true,
+                modalContent: JSON.stringify(
+                  JSON.parse(localStorage.getItem('ratedMoviesList')),
+                  null,
+                  2
+                ),
+              });
+            }}
+            color='primary'
+            variant='solid'
+            size='small'
+            style={{ marginTop: 40 }}
+          >
+            Show localStorage
+          </Button>
+          <Button
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            color='danger'
+            variant='solid'
+            size='small'
+          >
+            Clear localStorage
+          </Button>
+        </Space>
+
         {error.isError && (
           <Alert
             type='error'
@@ -255,7 +344,11 @@ export default class App extends Component {
               label: 'Rated',
               children: (
                 <MoviesList
-                  moviesList={ratedMoviesList}
+                  moviesList={paginateList(
+                    ratedMoviesList,
+                    page,
+                    pageSize
+                  )}
                   isMobile={window.innerWidth < 576}
                   isLoaded={isLoaded}
                   error={error}

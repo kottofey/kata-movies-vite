@@ -1,6 +1,6 @@
-import KpAPIError from './Errors/KpAPIError';
-import NoInternetError from './Errors/NoInternetError';
-import KPEmptyResponseError from './Errors/KPEmptyResponseError';
+import KpAPIError from '../utils/Errors/KpAPIError';
+import NoInternetError from '../utils/Errors/NoInternetError';
+import KPEmptyResponseError from '../utils/Errors/KPEmptyResponseError';
 
 const KP_API_KEY = 'C3N95B6-J6MMZT5-HX88DKF-BCDKVQ4';
 
@@ -59,8 +59,8 @@ export default class KinopoiskAPI {
 
     this.respObj = {
       ...this.respObj,
-      total: response.total,
       page: response.page,
+      total: response.total,
     };
     return this.respObj;
   };
