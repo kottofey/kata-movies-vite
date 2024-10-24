@@ -91,6 +91,7 @@
     "no-debugger": "off",
     "no-unused-vars": "warn",
     "no-inline-comments": "error",
+    "no-underscore-dangle": "off",
     "jsx-a11y/control-has-associated-label": "off",
     "jsx-a11y/label-has-associated-control": "off",
     "react/jsx-filename-extension": [

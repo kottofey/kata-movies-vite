@@ -1,0 +1,2 @@
+eslint --config .eslint.json "src/**/*.{js,jsx}" --fix
+git update-index --again

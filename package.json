@@ -9,7 +9,8 @@
     "lint": "eslint --config .eslint.json \"src/**/*.{js,jsx}\"",
     "lint:fix": "eslint --config .eslint.json \"src/**/*.{js,jsx}\" --fix",
     "format": "prettier .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
