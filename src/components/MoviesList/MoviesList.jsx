@@ -4,9 +4,6 @@ import Movie from '../Movie';
 
 export default function MoviesList({
   moviesList,
-  error,
-  isLoaded,
-  isMobile,
   onRatingChange,
   onPaginationChange,
 }) {
@@ -28,9 +25,6 @@ export default function MoviesList({
             <Movie
               key={`movie${id}`}
               movie={movie}
-              error={error}
-              isMobile={isMobile}
-              isLoaded={isLoaded}
               onRatingChange={onRatingChange}
             />
           );

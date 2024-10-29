@@ -1,19 +1,19 @@
 import PropTypes from 'prop-types';
 import { Typography, Tag, Card, Image, Rate, Row, Col } from 'antd';
+import { useContext } from 'react';
 
 import Spinner from '../Spinner';
 import calcRatingColor from '../../utils/CalcRatingColor';
 import getShortText from '../../utils/getShortText';
+import {
+  IsLoadedContext,
+  ErrorContext,
+  IsMobileContext,
+} from '../../context/Contexts';
 
 const { Paragraph } = Typography;
 
-export default function Movie({
-  movie,
-  onRatingChange,
-  isMobile,
-  isLoaded,
-  error,
-}) {
+export default function Movie({ movie, onRatingChange }) {
   const {
     id,
     poster,
@@ -24,6 +24,10 @@ export default function Movie({
     customRating,
     tags,
   } = movie;
+
+  const isLoaded = useContext(IsLoadedContext);
+  const error = useContext(ErrorContext);
+  const isMobile = useContext(IsMobileContext);
 
   let singleRating =
     rating.kp ||

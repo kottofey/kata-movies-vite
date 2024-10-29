@@ -8,6 +8,11 @@ import KinopoiskAPI from '../../api/KinopoiskAPI';
 import AltKinopoiskAPI from '../../api/AltKinopoiskAPI';
 import paginateList from '../../utils/paginateList';
 import KpAPITransform from '../../api/KpAPITransform';
+import {
+  IsLoadedContext,
+  ErrorContext,
+  IsMobileContext,
+} from '../../context/Contexts';
 
 export default class App extends Component {
   state = {
@@ -217,103 +222,101 @@ export default class App extends Component {
     const { page, pageSize } = ratedMoviesList;
 
     return (
-      <>
-        <Radio.Group
-          defaultValue='KP'
-          size='small'
-          buttonStyle='solid'
-          onChange={(e) => {
-            this.setState(() => {
-              return {
-                api: e.target.value,
-              };
-            });
-          }}
-        >
-          <Radio.Button value='KP'>API</Radio.Button>
-          <Radio.Button value='altKP'>altAPI</Radio.Button>
-        </Radio.Group>
-        {error.isError && (
-          <Alert
-            type='error'
-            message={`${error.errorObj.error}. Код ошибки: ${error.errorObj.statusCode}`}
-            description={error.errorObj.message}
-            closable
-            banner
-            onClose={() =>
-              this.setState(() => {
-                return {
-                  error: { isError: false },
-                };
-              })
-            }
-            style={{
-              position: 'absolute',
-              zIndex: 1000,
-              width: '100%',
-            }}
-          />
-        )}
-        <Tabs
-          defaultActiveKey={0}
-          centered
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-          }}
-          onChange={(tab) => this.onTabChange(tab)}
-          items={[
-            {
-              key: 'search',
-              label: 'Search',
-              children: (
-                <>
-                  <Input
-                    placeholder='Type to search...'
-                    style={{
-                      width: '90vw',
-                      maxWidth: 990,
-                      marginBottom: 18,
-                    }}
-                    onChange={(e) => {
-                      this.onSearchDebounced(e.target.value);
-                    }}
-                  />
-                  <MoviesList
-                    moviesList={moviesList}
-                    error={error}
-                    isLoaded={isLoaded}
-                    isMobile={window.innerWidth < 576}
-                    tabSelected={tabSelected}
-                    onRatingChange={this.onRatingChange}
-                    onPaginationChange={this.onPaginationChange}
-                  />
-                </>
-              ),
-            },
-            {
-              key: 'rated',
-              label: 'Rated',
-              children: (
-                <MoviesList
-                  moviesList={paginateList(
-                    ratedMoviesList,
-                    page,
-                    pageSize
-                  )}
-                  isMobile={window.innerWidth < 576}
-                  isLoaded={isLoaded}
-                  error={error}
-                  tabSelected={tabSelected}
-                  onRatingChange={this.onRatingChange}
-                  onPaginationChange={this.onPaginationChange}
-                />
-              ),
-            },
-          ]}
-        />
-      </>
+      <IsMobileContext.Provider value={window.innerWidth < 576}>
+        <IsLoadedContext.Provider value={isLoaded}>
+          <ErrorContext.Provider value={error}>
+            <Radio.Group
+              defaultValue='KP'
+              size='small'
+              buttonStyle='solid'
+              onChange={(e) => {
+                this.setState(() => {
+                  return {
+                    api: e.target.value,
+                  };
+                });
+              }}
+            >
+              <Radio.Button value='KP'>API</Radio.Button>
+              <Radio.Button value='altKP'>altAPI</Radio.Button>
+            </Radio.Group>
+            {error.isError && (
+              <Alert
+                type='error'
+                message={`${error.errorObj.error}. Код ошибки: ${error.errorObj.statusCode}`}
+                description={error.errorObj.message}
+                closable
+                banner
+                onClose={() =>
+                  this.setState(() => {
+                    return {
+                      error: { isError: false },
+                    };
+                  })
+                }
+                style={{
+                  position: 'absolute',
+                  zIndex: 1000,
+                  width: '100%',
+                }}
+              />
+            )}
+            <Tabs
+              defaultActiveKey={0}
+              centered
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+              }}
+              onChange={(tab) => this.onTabChange(tab)}
+              items={[
+                {
+                  key: 'search',
+                  label: 'Search',
+                  children: (
+                    <>
+                      <Input
+                        placeholder='Type to search...'
+                        style={{
+                          width: '90vw',
+                          maxWidth: 990,
+                          marginBottom: 18,
+                        }}
+                        onChange={(e) => {
+                          this.onSearchDebounced(e.target.value);
+                        }}
+                      />
+                      <MoviesList
+                        moviesList={moviesList}
+                        tabSelected={tabSelected}
+                        onRatingChange={this.onRatingChange}
+                        onPaginationChange={this.onPaginationChange}
+                      />
+                    </>
+                  ),
+                },
+                {
+                  key: 'rated',
+                  label: 'Rated',
+                  children: (
+                    <MoviesList
+                      moviesList={paginateList(
+                        ratedMoviesList,
+                        page,
+                        pageSize
+                      )}
+                      tabSelected={tabSelected}
+                      onRatingChange={this.onRatingChange}
+                      onPaginationChange={this.onPaginationChange}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </ErrorContext.Provider>
+        </IsLoadedContext.Provider>
+      </IsMobileContext.Provider>
     );
   }
 }
