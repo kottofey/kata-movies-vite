@@ -5,11 +5,7 @@ import { useContext } from 'react';
 import Spinner from '../Spinner';
 import calcRatingColor from '../../utils/CalcRatingColor';
 import getShortText from '../../utils/getShortText';
-import {
-  IsLoadedContext,
-  ErrorContext,
-  IsMobileContext,
-} from '../../context/Contexts';
+import { OptionsContext } from '../../context/Contexts';
 
 const { Paragraph } = Typography;
 
@@ -25,9 +21,10 @@ export default function Movie({ movie, onRatingChange }) {
     tags,
   } = movie;
 
-  const isLoaded = useContext(IsLoadedContext);
-  const error = useContext(ErrorContext);
-  const isMobile = useContext(IsMobileContext);
+  // const isLoaded = useContext(IsLoadedContext);
+  // const error = useContext(ErrorContext);
+  // const isMobile = useContext(IsMobileContext);
+  const { isLoaded, error, isMobile } = useContext(OptionsContext);
 
   let singleRating =
     rating.kp ||
